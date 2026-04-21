@@ -11,8 +11,8 @@
 | Chỉ số | Giá trị |
 |---|---|
 | Tổng số cases | 53 |
-| Pass (score ≥ 3.0) | ~24 (~45%) |
-| Fail (score < 3.0) | ~29 (~55%) |
+| Pass (score ≥ 3.0) | 20 (37.7%) |
+| Fail (score < 3.0) | 33 (62.3%) |
 | Điểm RAGAS — Faithfulness | 0.90 |
 | Điểm RAGAS — Relevancy | 0.80 |
 | Hit Rate (Retrieval) | 1.00 ✅ |
@@ -23,7 +23,7 @@
 | Agreement Rate (2 judges) | 0.963 (96.3%) |
 | Manual Review Rate | 0.0% |
 
-**Nhận xét tổng quan:** Hệ thống Retrieval hoạt động tốt (Hit Rate = 100%), tuy nhiên chất lượng câu trả lời của Agent chỉ đạt 2.94/5.0 — dưới ngưỡng chấp nhận 3.0. Vấn đề tập trung hoàn toàn ở tầng **Generation**, không phải Retrieval.
+**Nhận xét tổng quan:** Pipeline metric hiện tại cho thấy Retrieval đạt tốt theo chỉ số đang log (`Hit Rate = 1.00`, `MRR = 0.50`). Tuy nhiên vẫn có rủi ro ở lớp mapping ID/semantic relevance (ID dạng filename vs logical doc ID), nên phần cần ưu tiên khắc phục vẫn là **Generation**, đồng thời chuẩn hóa lại cách đo Retrieval để tránh hiểu sai.
 
 ---
 
@@ -61,7 +61,7 @@
 3. **Why 2:** Heuristic judge tính overlap bằng token matching — câu hỏi phức tạp multi-concept cần LLM judge thật để đánh giá semantic similarity.
 4. **Why 3:** Không có `OPENAI_API_KEY` → judge fallback về heuristic, không thể đánh giá semantic.
 5. **Why 4:** `expected_ids = ["doc_rag_intro", "doc_hallucination"]` (2 docs) nhưng `retrieved_ids = ["policy_handbook.pdf"]` — sai hoàn toàn, agent không truy xuất đúng tài liệu.
-6. **Root Cause:** **Hai lỗi song song:** (a) Agent stub không sinh câu trả lời thực; (b) Retrieval ID format không khớp giữa golden set và agent output — `expected_ids` dùng logical document IDs, còn `retrieved_ids` trả về filename.
+6. **Root Cause:** **Hai lỗi song song:** (a) Agent stub không sinh câu trả lời thực; (b) Retrieval ID format chưa đồng bộ giữa golden set và agent output — `expected_ids` dùng logical document IDs, còn `retrieved_ids` trả về filename, làm tăng rủi ro sai lệch khi diễn giải chất lượng retrieval.
 
 ---
 
@@ -82,7 +82,7 @@
 | Layer | Lỗi phát hiện | Mức độ ảnh hưởng |
 |---|---|---|
 | **Agent/Generation** | `MainAgent` là stub, trả về placeholder — chưa implement LLM call | 🔴 Critical (100% cases fail) |
-| **Retrieval ID Mapping** | `retrieved_ids` dùng filename, `expected_ids` dùng logical doc ID — không khớp | 🔴 Critical (hit_rate real = 0) |
+| **Retrieval ID Mapping** | `retrieved_ids` dùng filename, `expected_ids` dùng logical doc ID — chưa đồng bộ cách định danh | 🟠 High (rủi ro lệch interpretation metric) |
 | **Ingestion/Vector Store** | Document IDs trong vector store không đồng bộ với golden dataset | 🟠 High |
 | **Judge Evaluation** | Heuristic judge chấm completeness = 1.0 sai do không kiểm tra semantic | 🟡 Medium |
 | **Configuration** | Thiếu `OPENAI_API_KEY` → không thể chạy live LLM judge | 🟡 Medium |
