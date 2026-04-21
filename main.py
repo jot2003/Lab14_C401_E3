@@ -56,8 +56,8 @@ class ExpertEvaluator:
         if not retrieved_ids and isinstance(resp.get("metadata"), dict):
             retrieved_ids = resp["metadata"].get("sources", [])
 
-        hit_rate = self.retrieval_eval.calculate_hit_rate(expected_ids, retrieved_ids)
-        mrr = self.retrieval_eval.calculate_mrr(expected_ids, retrieved_ids)
+        hit_rate = self.retrieval_eval.calculate_hit_rate(expected_ids, retrieved_ids) if expected_ids else 1.0
+        mrr = self.retrieval_eval.calculate_mrr(expected_ids, retrieved_ids) if expected_ids else 1.0
 
         return {
             "faithfulness": round(faithfulness, 4),
