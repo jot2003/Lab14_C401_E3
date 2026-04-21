@@ -2,25 +2,25 @@
   "metadata": {
     "version": "Agent_V2_Optimized",
     "total": 53,
-    "timestamp": "2026-04-21 17:38:08",
+    "timestamp": "2026-04-21 17:46:12",
     "judge_models": [
       "gpt-4o",
       "gpt-4o-mini"
     ],
     "judge_mode": "multi-live-or-fallback",
-    "elapsed_sec": 33.09
+    "elapsed_sec": 41.68
   },
   "metrics": {
-    "avg_score": 3.7217,
+    "avg_score": 4.5453,
     "hit_rate": 1.0,
-    "agreement_rate": 0.8939,
+    "agreement_rate": 0.9425,
     "manual_review_rate": 0.0566,
-    "pass_count": 43,
-    "fail_count": 7,
-    "pass_rate": 0.8113,
+    "pass_count": 47,
+    "fail_count": 3,
+    "pass_rate": 0.8868,
     "judge_model_avg_scores": {
-      "gpt-4o": 3.7264,
-      "gpt-4o-mini": 3.717
+      "gpt-4o": 4.6189,
+      "gpt-4o-mini": 4.4717
     }
   },
   "cost": {
@@ -43,19 +43,19 @@
       "decision": "RELEASE",
       "passed": true,
       "reasons": [
-        "avg_score=3.722 (need >= 3.0)",
+        "avg_score=4.545 (need >= 3.0)",
         "hit_rate=1.000 (need >= 0.8)",
-        "agreement_rate=0.894 (need >= 0.7)",
+        "agreement_rate=0.943 (need >= 0.7)",
         "manual_review_rate=0.057 (need <= 0.1)",
-        "delta=+0.005 (need >= -0.05)"
+        "delta=+0.093 (need >= -0.05)"
       ],
       "failed_checks": [],
       "metrics_snapshot": {
-        "v1_avg_score": 3.717,
-        "v2_avg_score": 3.7217,
-        "delta": 0.0047,
+        "v1_avg_score": 4.4528,
+        "v2_avg_score": 4.5453,
+        "delta": 0.0925,
         "hit_rate": 1.0,
-        "agreement_rate": 0.8939,
+        "agreement_rate": 0.9425,
         "manual_review_rate": 0.0566
       },
       "thresholds": {
@@ -67,15 +67,15 @@
       }
     },
     "v1_metrics": {
-      "avg_score": 3.717,
+      "avg_score": 4.4528,
       "hit_rate": 1.0,
       "agreement_rate": 1.0,
       "manual_review_rate": 0.0,
-      "pass_count": 47,
-      "fail_count": 6,
-      "pass_rate": 0.8868,
+      "pass_count": 48,
+      "fail_count": 5,
+      "pass_rate": 0.9057,
       "judge_model_avg_scores": {
-        "gpt-4o-mini": 3.717
+        "gpt-4o-mini": 4.4528
       }
     }
   }

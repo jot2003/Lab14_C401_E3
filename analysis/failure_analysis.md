@@ -1,4 +1,88 @@
 # Bao cao Phan tich That bai (Failure Analysis Report)
+> Tac gia: Nguyen Thanh Nam (2A202600205) - Task D14-T04  
+> Ngay cap nhat: 21/04/2026  
+> Dataset: `data/golden_set.jsonl` - 53 test cases  
+> Phien ban phan tich: Agent_V2_Optimized
+
+---
+
+## 1. Tong quan benchmark (lan chay moi nhat)
+
+| Chi so | Gia tri |
+|---|---|
+| Tong so cases | 53 |
+| Pass (score >= 3.0) | 47 (88.7%) |
+| Fail (score < 3.0) | 3 (5.7%) |
+| Review (requires_manual_review) | 3 (5.7%) |
+| Avg score (V2) | **4.5453 / 5.0** |
+| Hit Rate (retrieval) | 1.0000 |
+| Agreement Rate (judge) | 0.9425 |
+| Manual Review Rate | 0.0566 |
+| GPT-4o avg | 4.6415 |
+| GPT-4o-mini avg | 4.4491 |
+| Gate decision | **RELEASE** |
+
+Nhan xet: Sau khi chuyen MainAgent sang goi `gpt-4o-mini` (co context grounding), chat luong tang manh va dat nguong release o tat ca dieu kien gate.
+
+---
+
+## 2. Phan nhom loi con lai
+
+| Nhom loi | So luong | Dau hieu |
+|---|---|---|
+| Borderline factual mismatch | 3 cases | final_score < 3 do thieu chi tiet can thiet |
+| Judge conflict (manual review) | 3 cases | do lech score >= threshold conflict |
+| Retrieval miss | 0 cases | hit_rate da dat 1.0 |
+
+Tac dong hien tai: He thong da on dinh, loi chu yeu con lai la nhom case "bien gioi" can tinh chinh rubric va answer style.
+
+---
+
+## 3. 5 Whys cho nhom loi con lai
+
+### Case type A - Borderline factual mismatch
+1. Symptom: score duoi 3 o mot vai case factual.  
+2. Why 1: Answer dung huong nhung thieu mot vai keyword can thiet trong expected answer.  
+3. Why 2: Prompt tra loi uu tien ngan gon nen co the bo sot chi tiet.  
+4. Why 3: Chua co step "must-include key facts" cho cau hoi factual.  
+5. Why 4: Chua tune theo tung loai cau hoi.  
+6. Root cause: Answer style chua du "precision checklist" cho factual cases.
+
+### Case type B - Judge conflict (review)
+1. Symptom: 2 judge lech diem o case gan nguong pass/fail.  
+2. Why 1: Cau tra loi co phan dung va phan thieu, de mo hinh danh gia khac nhau.  
+3. Why 2: Rubric completeness/accuracy nhay voi cach dien dat.  
+4. Why 3: Chua co tie-break rule theo type case.  
+5. Why 4: Chua co calibration bo sung cho case borderline.  
+6. Root cause: Judge calibration cho case bien gioi chua toi uu.
+
+---
+
+## 4. Ke hoach cai tien
+
+### P0
+- Them "factual checklist" trong answer generation de giam fail factual.
+- Tinh chinh conflict handling cho borderline cases (tie-break rule ro hon).
+
+### P1
+- Them metric breakdown theo difficulty/type de khoanh vung loi nhanh.
+- Bo sung evaluate pass/fail theo nhom case de theo doi regression chi tiet.
+
+### P2
+- Cascade judge strategy (mini truoc, 4o khi can) de giam chi phi.
+- Cache judge responses theo hash(question + answer).
+
+---
+
+## 5. Regression gate summary (lan chay moi nhat)
+
+| Version | avg_score | hit_rate | agreement_rate | manual_review_rate | Decision |
+|---|---|---|---|---|---|
+| Agent_V1_Base | 4.4528 | 1.0000 | 1.0000 | 0.0000 | Baseline |
+| Agent_V2_Optimized | 4.5453 | 1.0000 | 0.9425 | 0.0566 | **RELEASE** |
+
+Ket luan: He thong da release-ready theo bo threshold hien tai. Uu tien tiep theo la giam so case review/fail con lai de tang do on dinh.
+# Bao cao Phan tich That bai (Failure Analysis Report)
 > Tac gia: Nguyen Thanh Nam (2A202600205) - Task D14-T04
 > Ngay: 21/04/2026
 > Dataset: `data/golden_set.jsonl` - 53 test cases

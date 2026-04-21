@@ -1,6 +1,9 @@
 import asyncio
+import os
 import re
 from typing import List, Dict
+from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
 # Import corpus for keyword-based retrieval
 import sys, os
@@ -30,6 +33,10 @@ class MainAgent:
     def __init__(self, top_k: int = 3):
         self.name = "SupportAgent-v2"
         self.top_k = top_k
+        load_dotenv()
+        self.answer_model = os.getenv("ANSWER_MODEL", "gpt-4o-mini")
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        self.client = AsyncOpenAI(api_key=api_key) if api_key else None
         self._docs = CORPUS
         self._tokenized = {
             doc["doc_id"]: set(re.findall(r"\w+", doc["content"].lower()))
@@ -141,18 +148,51 @@ class MainAgent:
         contexts = [doc["content"] for doc in retrieved_docs]
         retrieved_ids = [doc["doc_id"] for doc in retrieved_docs]
 
-        answer = self._extract_answer(question, contexts)
+        answer = await self._generate_answer(question, contexts)
 
         return {
             "answer": answer,
             "contexts": contexts,
             "retrieved_ids": retrieved_ids,
             "metadata": {
-                "model": "keyword-rag-v2",
+                "model": self.answer_model if self.client else "keyword-rag-v2-fallback",
                 "tokens_used": len(answer.split()),
                 "sources": retrieved_ids,
             },
         }
+
+    async def _generate_answer(self, question: str, contexts: List[str]) -> str:
+        """Generate answer with gpt-4o-mini; fallback to local extraction if API fails."""
+        if not contexts:
+            return "I don't have sufficient information in the knowledge base to answer this question."
+
+        # Fallback mode for environments without API key.
+        if not self.client:
+            return self._extract_answer(question, contexts)
+
+        context_block = "\n\n".join(
+            [f"[Context {i + 1}]\n{ctx}" for i, ctx in enumerate(contexts)]
+        )
+        prompt = (
+            "You are a RAG assistant. Answer ONLY from the provided contexts.\n"
+            "If the answer is not in contexts, explicitly say you do not have enough information.\n"
+            "Keep the answer concise and factual.\n\n"
+            f"Question:\n{question}\n\n"
+            f"Contexts:\n{context_block}"
+        )
+        try:
+            completion = await self.client.chat.completions.create(
+                model=self.answer_model,
+                temperature=0.1,
+                messages=[
+                    {"role": "system", "content": "Ground your answer in the supplied contexts only."},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            content = (completion.choices[0].message.content or "").strip()
+            return content if content else self._extract_answer(question, contexts)
+        except Exception:
+            return self._extract_answer(question, contexts)
 
 
 if __name__ == "__main__":
