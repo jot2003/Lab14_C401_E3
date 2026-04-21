@@ -2,13 +2,13 @@
   "metadata": {
     "version": "Agent_V2_Optimized",
     "total": 53,
-    "timestamp": "2026-04-21 15:05:44",
+    "timestamp": "2026-04-21 15:22:12",
     "judge_models": [
       "gpt-4o",
       "gpt-4o-mini"
     ],
     "judge_mode": "multi-live-or-fallback",
-    "elapsed_sec": 5.62
+    "elapsed_sec": 5.59
   },
   "metrics": {
     "avg_score": 2.9449,
