@@ -2,25 +2,25 @@
   "metadata": {
     "version": "Agent_V2_Optimized",
     "total": 53,
-    "timestamp": "2026-04-21 16:59:42",
+    "timestamp": "2026-04-21 17:38:08",
     "judge_models": [
       "gpt-4o",
       "gpt-4o-mini"
     ],
     "judge_mode": "multi-live-or-fallback",
-    "elapsed_sec": 38.92
+    "elapsed_sec": 33.09
   },
   "metrics": {
-    "avg_score": 3.4717,
-    "hit_rate": 0.8679,
-    "agreement_rate": 0.8585,
+    "avg_score": 3.7217,
+    "hit_rate": 1.0,
+    "agreement_rate": 0.8939,
     "manual_review_rate": 0.0566,
-    "pass_count": 38,
-    "fail_count": 12,
-    "pass_rate": 0.717,
+    "pass_count": 43,
+    "fail_count": 7,
+    "pass_rate": 0.8113,
     "judge_model_avg_scores": {
-      "gpt-4o": 3.5472,
-      "gpt-4o-mini": 3.3962
+      "gpt-4o": 3.7264,
+      "gpt-4o-mini": 3.717
     }
   },
   "cost": {
@@ -43,19 +43,19 @@
       "decision": "RELEASE",
       "passed": true,
       "reasons": [
-        "avg_score=3.472 (need >= 3.0)",
-        "hit_rate=0.868 (need >= 0.8)",
-        "agreement_rate=0.859 (need >= 0.7)",
+        "avg_score=3.722 (need >= 3.0)",
+        "hit_rate=1.000 (need >= 0.8)",
+        "agreement_rate=0.894 (need >= 0.7)",
         "manual_review_rate=0.057 (need <= 0.1)",
-        "delta=+0.075 (need >= -0.05)"
+        "delta=+0.005 (need >= -0.05)"
       ],
       "failed_checks": [],
       "metrics_snapshot": {
-        "v1_avg_score": 3.3962,
-        "v2_avg_score": 3.4717,
-        "delta": 0.0755,
-        "hit_rate": 0.8679,
-        "agreement_rate": 0.8585,
+        "v1_avg_score": 3.717,
+        "v2_avg_score": 3.7217,
+        "delta": 0.0047,
+        "hit_rate": 1.0,
+        "agreement_rate": 0.8939,
         "manual_review_rate": 0.0566
       },
       "thresholds": {
@@ -67,15 +67,15 @@
       }
     },
     "v1_metrics": {
-      "avg_score": 3.3962,
-      "hit_rate": 0.8679,
+      "avg_score": 3.717,
+      "hit_rate": 1.0,
       "agreement_rate": 1.0,
       "manual_review_rate": 0.0,
-      "pass_count": 41,
-      "fail_count": 12,
-      "pass_rate": 0.7736,
+      "pass_count": 47,
+      "fail_count": 6,
+      "pass_rate": 0.8868,
       "judge_model_avg_scores": {
-        "gpt-4o-mini": 3.3962
+        "gpt-4o-mini": 3.717
       }
     }
   }
