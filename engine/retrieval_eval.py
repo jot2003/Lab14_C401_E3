@@ -23,10 +23,53 @@ class RetrievalEvaluator:
                 return 1.0 / (i + 1)
         return 0.0
 
-    async def evaluate_batch(self, dataset: List[Dict]) -> Dict:
+    async def evaluate_batch(self, dataset: List[Dict], top_k: int = 3) -> Dict:
         """
         Chạy eval cho toàn bộ bộ dữ liệu.
         Dataset cần có trường 'expected_retrieval_ids' và Agent trả về 'retrieved_ids'.
+        Trả về cả by_case để debug.
         """
-        # Placeholder logic
-        return {"avg_hit_rate": 0.85, "avg_mrr": 0.72}
+        hit_rates = []
+        mrrs = []
+        by_case = []
+        for idx, case in enumerate(dataset):
+            # Fallback: lấy expected ids
+            expected_ids = []
+            if isinstance(case.get('metadata'), dict) and 'expected_retrieval_ids' in case['metadata']:
+                expected_ids = case['metadata']['expected_retrieval_ids']
+            elif 'expected_retrieval_ids' in case:
+                expected_ids = case['expected_retrieval_ids']
+            elif 'expected_ids' in case:
+                expected_ids = case['expected_ids']
+            if not isinstance(expected_ids, list):
+                expected_ids = [expected_ids] if expected_ids else []
+            # Fallback: lấy retrieved ids từ agent response
+            retrieved_ids = case.get('retrieved_ids') or []
+            # Nếu agent trả về metadata dạng dict
+            if not retrieved_ids and isinstance(case.get('agent_response'), dict):
+                meta = case['agent_response'].get('metadata', {})
+                retrieved_ids = meta.get('retrieved_ids') or meta.get('sources') or []
+            # Đảm bảo là list
+            if not isinstance(expected_ids, list):
+                expected_ids = [expected_ids] if expected_ids else []
+            if not isinstance(retrieved_ids, list):
+                retrieved_ids = [retrieved_ids] if retrieved_ids else []
+            # Tính toán
+            hit = self.calculate_hit_rate(expected_ids, retrieved_ids, top_k=top_k)
+            mrr = self.calculate_mrr(expected_ids, retrieved_ids)
+            hit_rates.append(hit)
+            mrrs.append(mrr)
+            by_case.append({
+                "case_idx": idx,
+                "expected_ids": expected_ids,
+                "retrieved_ids": retrieved_ids,
+                "hit_rate": hit,
+                "mrr": mrr
+            })
+        avg_hit_rate = sum(hit_rates) / len(hit_rates) if hit_rates else 0.0
+        avg_mrr = sum(mrrs) / len(mrrs) if mrrs else 0.0
+        return {
+            "avg_hit_rate": avg_hit_rate,
+            "avg_mrr": avg_mrr,
+            "by_case": by_case
+        }
