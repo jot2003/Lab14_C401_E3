@@ -722,7 +722,7 @@ async def main(use_openai: bool = False, target: int = 60) -> None:
 
     # Ensure we always meet the 50-case minimum with hardcoded data
     total = len(cases)
-    print(f"\n📊 Dataset summary:")
+    print("\n[Dataset summary]")
     print(f"   Normal cases      : {len(NORMAL_CASES)}")
     print(f"   Adversarial cases : {len(ADVERSARIAL_CASES)}")
     if use_openai:
@@ -731,16 +731,16 @@ async def main(use_openai: bool = False, target: int = 60) -> None:
     print(f"   Total             : {total}")
 
     if total < 50:
-        print(f"⚠️  WARNING: only {total} cases generated (minimum is 50).")
+        print(f"[WARNING] only {total} cases generated (minimum is 50).")
     else:
-        print(f"✅ Minimum 50-case requirement satisfied.")
+        print("[OK] Minimum 50-case requirement satisfied.")
 
     out_path = os.path.join(os.path.dirname(__file__), "golden_set.jsonl")
     with open(out_path, "w", encoding="utf-8") as f:
         for case in cases:
             f.write(json.dumps(case, ensure_ascii=False) + "\n")
 
-    print(f"\n✅ Saved {total} cases → {out_path}")
+    print(f"\n[OK] Saved {total} cases -> {out_path}")
 
     # Quick validation
     errors = 0
@@ -760,10 +760,10 @@ async def main(use_openai: bool = False, target: int = 60) -> None:
                 errors += 1
 
     if errors:
-        print(f"❌ {errors} validation error(s) found.")
+        print(f"[ERROR] {errors} validation error(s) found.")
         sys.exit(1)
     else:
-        print("✅ JSONL validation passed — no malformed lines.")
+        print("[OK] JSONL validation passed - no malformed lines.")
 
 
 if __name__ == "__main__":
@@ -774,4 +774,4 @@ if __name__ == "__main__":
 
     t0 = time.perf_counter()
     asyncio.run(main(use_openai=args.openai, target=args.count))
-    print(f"⏱  Done in {time.perf_counter() - t0:.2f}s")
+    print(f"[Done] {time.perf_counter() - t0:.2f}s")
