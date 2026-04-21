@@ -2,25 +2,25 @@
   "metadata": {
     "version": "Agent_V2_Optimized",
     "total": 53,
-    "timestamp": "2026-04-21 15:22:12",
+    "timestamp": "2026-04-21 16:59:42",
     "judge_models": [
       "gpt-4o",
       "gpt-4o-mini"
     ],
     "judge_mode": "multi-live-or-fallback",
-    "elapsed_sec": 5.59
+    "elapsed_sec": 38.92
   },
   "metrics": {
-    "avg_score": 2.9449,
-    "hit_rate": 1.0,
-    "agreement_rate": 0.9629,
-    "manual_review_rate": 0.0,
-    "pass_count": 20,
-    "fail_count": 33,
-    "pass_rate": 0.3774,
+    "avg_score": 3.4717,
+    "hit_rate": 0.8679,
+    "agreement_rate": 0.8585,
+    "manual_review_rate": 0.0566,
+    "pass_count": 38,
+    "fail_count": 12,
+    "pass_rate": 0.717,
     "judge_model_avg_scores": {
-      "gpt-4o": 3.0183,
-      "gpt-4o-mini": 2.8683
+      "gpt-4o": 3.5472,
+      "gpt-4o-mini": 3.3962
     }
   },
   "cost": {
@@ -37,27 +37,26 @@
   "regression": {
     "v1_version": "Agent_V1_Base",
     "v2_version": "Agent_V2_Optimized",
-    "gate_decision": "ROLLBACK",
-    "gate_passed": false,
+    "gate_decision": "RELEASE",
+    "gate_passed": true,
     "gate_details": {
-      "decision": "ROLLBACK",
-      "passed": false,
+      "decision": "RELEASE",
+      "passed": true,
       "reasons": [
-        "hit_rate=1.000 (need >= 0.8)",
-        "agreement_rate=0.963 (need >= 0.7)",
-        "manual_review_rate=0.000 (need <= 0.1)",
-        "delta=+0.077 (need >= -0.05)"
+        "avg_score=3.472 (need >= 3.0)",
+        "hit_rate=0.868 (need >= 0.8)",
+        "agreement_rate=0.859 (need >= 0.7)",
+        "manual_review_rate=0.057 (need <= 0.1)",
+        "delta=+0.075 (need >= -0.05)"
       ],
-      "failed_checks": [
-        "avg_score=2.945 (need >= 3.0)"
-      ],
+      "failed_checks": [],
       "metrics_snapshot": {
-        "v1_avg_score": 2.8683,
-        "v2_avg_score": 2.9449,
-        "delta": 0.0766,
-        "hit_rate": 1.0,
-        "agreement_rate": 0.9629,
-        "manual_review_rate": 0.0
+        "v1_avg_score": 3.3962,
+        "v2_avg_score": 3.4717,
+        "delta": 0.0755,
+        "hit_rate": 0.8679,
+        "agreement_rate": 0.8585,
+        "manual_review_rate": 0.0566
       },
       "thresholds": {
         "min_avg_score": 3.0,
@@ -68,15 +67,15 @@
       }
     },
     "v1_metrics": {
-      "avg_score": 2.8683,
-      "hit_rate": 1.0,
+      "avg_score": 3.3962,
+      "hit_rate": 0.8679,
       "agreement_rate": 1.0,
       "manual_review_rate": 0.0,
-      "pass_count": 15,
-      "fail_count": 38,
-      "pass_rate": 0.283,
+      "pass_count": 41,
+      "fail_count": 12,
+      "pass_rate": 0.7736,
       "judge_model_avg_scores": {
-        "gpt-4o-mini": 2.8683
+        "gpt-4o-mini": 3.3962
       }
     }
   }

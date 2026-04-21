@@ -8,18 +8,62 @@ from typing import Dict, Any, List, Optional, Tuple
 
 from engine.runner import BenchmarkRunner
 from engine.llm_judge import LLMJudge
+from engine.retrieval_eval import RetrievalEvaluator
 from agent.main_agent import MainAgent
 
+import re
 
 # ---------------------------------------------------------------------------
-# RAGAS-style evaluator (heuristic, no API required)
+# RAGAS-style evaluator — computes real token-overlap metrics
 # ---------------------------------------------------------------------------
 class ExpertEvaluator:
+    def __init__(self):
+        self.retrieval_eval = RetrievalEvaluator()
+
+    @staticmethod
+    def _tokenize(text: str):
+        return set(re.findall(r"\w+", (text or "").lower()))
+
+    def calculate_hit_rate(self, expected_ids, retrieved_ids, top_k=3):
+        return self.retrieval_eval.calculate_hit_rate(expected_ids, retrieved_ids, top_k)
+
+    def calculate_mrr(self, expected_ids, retrieved_ids):
+        return self.retrieval_eval.calculate_mrr(expected_ids, retrieved_ids)
+
     async def score(self, case, resp):
+        answer = resp.get("answer", "") if isinstance(resp, dict) else str(resp)
+        context_text = case.get("context", "")
+        expected = case.get("expected_answer", "")
+        question = case.get("question", "")
+
+        a_tok = self._tokenize(answer)
+        c_tok = self._tokenize(context_text)
+        e_tok = self._tokenize(expected)
+        q_tok = self._tokenize(question)
+
+        # Faithfulness: how much of the answer is grounded in context
+        faithfulness = len(a_tok & c_tok) / max(1, len(a_tok))
+        # Relevancy: how much of the answer relates to the question
+        relevancy = len(a_tok & q_tok) / max(1, len(q_tok))
+        # Correctness: overlap with expected answer
+        correctness = len(a_tok & e_tok) / max(1, len(e_tok))
+
+        # Get retrieval IDs for real hit_rate/mrr
+        expected_ids = []
+        if isinstance(case.get("metadata"), dict):
+            expected_ids = case["metadata"].get("expected_retrieval_ids", [])
+        retrieved_ids = resp.get("retrieved_ids") or []
+        if not retrieved_ids and isinstance(resp.get("metadata"), dict):
+            retrieved_ids = resp["metadata"].get("sources", [])
+
+        hit_rate = self.retrieval_eval.calculate_hit_rate(expected_ids, retrieved_ids)
+        mrr = self.retrieval_eval.calculate_mrr(expected_ids, retrieved_ids)
+
         return {
-            "faithfulness": 0.9,
-            "relevancy": 0.8,
-            "retrieval": {"hit_rate": 1.0, "mrr": 0.5},
+            "faithfulness": round(faithfulness, 4),
+            "relevancy": round(relevancy, 4),
+            "correctness": round(correctness, 4),
+            "retrieval": {"hit_rate": hit_rate, "mrr": mrr},
         }
 
 
@@ -203,7 +247,7 @@ async def run_benchmark_with_results(
 
     if agent_version == "Agent_V1_Base":
         judge_models = ["gpt-4o-mini"]
-        live = False
+        live = True
     else:
         judge_models = ["gpt-4o", "gpt-4o-mini"]
         live = True
