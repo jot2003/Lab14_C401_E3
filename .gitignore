@@ -22,9 +22,6 @@ Thumbs.db
 
 # Generated artifacts (not committed)
 data/golden_set.jsonl
-reports/
-analysis/failure_analysis.md
-analysis/reflections/
 
 # IDE
 .vscode/
