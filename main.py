@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import sys
 import time
 from dataclasses import dataclass, field, asdict
 from typing import Dict, Any, List, Optional, Tuple
@@ -336,4 +337,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     asyncio.run(main())
