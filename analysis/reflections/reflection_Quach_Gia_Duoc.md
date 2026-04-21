@@ -1,29 +1,29 @@
-# Reflection — Quach Gia Duoc (D14-T02: Retrieval Metrics)
+# Reflection — Quách Gia Duoc (D14-T02: Retrieval Metrics)
 
-## Task Summary
-Owned `engine/retrieval_eval.py` — responsible for implementing Hit Rate and MRR (Mean Reciprocal Rank) retrieval quality metrics.
+## Tóm tắt nhiệm vụ
+Phụ trách file `engine/retrieval_eval.py` — chịu trách nhiệm hiện thực các chỉ số đánh giá chất lượng truy hồi: Hit Rate và MRR (Mean Reciprocal Rank).
 
-## What I Did
-- Implemented `calculate_hit_rate(expected_ids, retrieved_ids, top_k=3)` — returns 1.0 if any expected document appears in top-k retrieved results.
-- Implemented `calculate_mrr(expected_ids, retrieved_ids)` — returns reciprocal of the rank of the first matching document.
-- Built `evaluate_batch()` to process entire datasets and compute aggregate `avg_hit_rate` and `avg_mrr`.
-- Integrated retrieval metrics into `BenchmarkRunner.run_single_test()` so per-case hit_rate and mrr flow through to reports.
+## Những việc tôi đã làm
+- Hiện thực hàm `calculate_hit_rate(expected_ids, retrieved_ids, top_k=3)` — trả về 1.0 nếu có ít nhất một tài liệu đúng xuất hiện trong top-k kết quả truy hồi.
+- Hiện thực hàm `calculate_mrr(expected_ids, retrieved_ids)` — trả về nghịch đảo thứ hạng của tài liệu đúng đầu tiên trong danh sách truy hồi.
+- Xây dựng hàm `evaluate_batch()` để xử lý toàn bộ dataset và tính toán tổng hợp `avg_hit_rate` và `avg_mrr`.
+- Tích hợp các chỉ số truy hồi vào `BenchmarkRunner.run_single_test()` để mỗi test case đều log được hit_rate và mrr vào báo cáo.
 
-## What Went Well
-- Clean separation between retrieval evaluation and the rest of the pipeline.
-- Metrics are well-defined and follow standard IR evaluation conventions (HR@k, MRR).
-- Results show Hit Rate = 1.0 in the RAGAS retrieval sub-score, confirming the metric pipeline works end-to-end.
+## Những điểm tốt
+- Phân tách rõ ràng giữa phần đánh giá truy hồi và các phần còn lại của pipeline.
+- Các chỉ số được định nghĩa rõ ràng, tuân thủ chuẩn đánh giá IR (HR@k, MRR).
+- Kết quả cho thấy Hit Rate = 1.0 trong sub-score retrieval của RAGAS, xác nhận pipeline metrics hoạt động end-to-end.
 
-## Challenges
-- ID format mismatch between golden dataset (`doc_rag_intro`) and agent output (`policy_handbook.pdf`) — the agent stub returns hardcoded filenames instead of logical document IDs.
-- Per-case `hit_rate` and `mrr` in benchmark_results show `null` because the runner computes them via RAGAS retrieval sub-scores rather than directly from my evaluator methods in some paths.
+## Khó khăn gặp phải
+- Không đồng nhất định dạng ID giữa bộ dữ liệu vàng (ví dụ: `doc_rag_intro`) và output của agent (ví dụ: `policy_handbook.pdf`) — agent mẫu trả về tên file cứng thay vì ID logic.
+- Trường `hit_rate` và `mrr` từng case trong benchmark_results bị null do runner lấy giá trị từ sub-score retrieval của RAGAS thay vì trực tiếp từ evaluator của tôi ở một số luồng.
 
-## What I Learned
-- Retrieval metrics are only meaningful when the ID scheme is consistent across the entire pipeline (dataset → vector store → agent output → evaluator).
-- Hit Rate is a coarse metric (binary per query); MRR provides more granular signal about ranking quality.
-- Integration testing across module boundaries is as important as unit correctness.
+## Bài học rút ra
+- Chỉ số truy hồi chỉ có ý nghĩa khi toàn bộ pipeline dùng chung một chuẩn ID (từ dataset → vector store → agent output → evaluator).
+- Hit Rate là chỉ số thô (nhị phân theo truy vấn); MRR cho tín hiệu chi tiết hơn về chất lượng xếp hạng.
+- Việc kiểm thử tích hợp giữa các module quan trọng không kém gì kiểm thử đơn vị.
 
-## If I Had More Time
-- Would implement NDCG@k for a more nuanced ranking metric.
-- Would add per-difficulty-level retrieval analysis to identify where retrieval fails most.
-- Would standardize the ID scheme with a shared mapping module.
+## Nếu có thêm thời gian
+- Sẽ hiện thực thêm chỉ số NDCG@k để đánh giá thứ hạng sâu hơn.
+- Sẽ phân tích truy hồi theo từng mức độ khó để xác định điểm yếu của hệ thống.
+- Sẽ chuẩn hóa lại scheme ID bằng một module mapping dùng chung cho toàn pipeline.
