@@ -3,6 +3,7 @@ import json
 import os
 import time
 from engine.runner import BenchmarkRunner
+from engine.llm_judge import LLMJudge
 from agent.main_agent import MainAgent
 
 # Giả lập các components Expert
@@ -15,13 +16,17 @@ class ExpertEvaluator:
             "retrieval": {"hit_rate": 1.0, "mrr": 0.5}
         }
 
-class MultiModelJudge:
-    async def evaluate_multi_judge(self, q, a, gt): 
-        return {
-            "final_score": 4.5, 
-            "agreement_rate": 0.8,
-            "reasoning": "Cả 2 model đồng ý đây là câu trả lời tốt."
-        }
+def calculate_judge_model_averages(results):
+    score_map = {}
+    for item in results:
+        for judge_name, judge_score in item["judge"].get("individual_scores", {}).items():
+            score_map.setdefault(judge_name, []).append(judge_score)
+
+    return {
+        judge_name: (sum(scores) / len(scores))
+        for judge_name, scores in score_map.items()
+        if scores
+    }
 
 async def run_benchmark_with_results(agent_version: str):
     print(f"🚀 Khởi động Benchmark cho {agent_version}...")
@@ -37,17 +42,27 @@ async def run_benchmark_with_results(agent_version: str):
         print("❌ File data/golden_set.jsonl rỗng. Hãy tạo ít nhất 1 test case.")
         return None, None
 
-    runner = BenchmarkRunner(MainAgent(), ExpertEvaluator(), MultiModelJudge())
+    runner = BenchmarkRunner(MainAgent(), ExpertEvaluator(), LLMJudge())
     results = await runner.run_all(dataset)
 
     total = len(results)
+    manual_review_count = sum(1 for r in results if r["judge"].get("requires_manual_review"))
+    judge_model_averages = calculate_judge_model_averages(results)
+
     summary = {
-        "metadata": {"version": agent_version, "total": total, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")},
+        "metadata": {
+            "version": agent_version,
+            "total": total,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "judge_models": list(judge_model_averages.keys()),
+        },
         "metrics": {
             "avg_score": sum(r["judge"]["final_score"] for r in results) / total,
             "hit_rate": sum(r["ragas"]["retrieval"]["hit_rate"] for r in results) / total,
-            "agreement_rate": sum(r["judge"]["agreement_rate"] for r in results) / total
-        }
+            "agreement_rate": sum(r["judge"]["agreement_rate"] for r in results) / total,
+            "manual_review_rate": manual_review_count / total,
+            "judge_model_avg_scores": judge_model_averages,
+        },
     }
     return results, summary
 

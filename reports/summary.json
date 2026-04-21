@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "version": "Agent_V2_Optimized",
+    "total": 53,
+    "timestamp": "2026-04-21 14:10:59",
+    "judge_models": [
+      "gpt-4o",
+      "gpt-4o-mini"
+    ]
+  },
+  "metrics": {
+    "avg_score": 1.0471698113207548,
+    "hit_rate": 1.0,
+    "agreement_rate": 0.9858490566037735,
+    "manual_review_rate": 0.0,
+    "judge_model_avg_scores": {
+      "gpt-4o": 1.0188679245283019,
+      "gpt-4o-mini": 1.0754716981132075
+    }
+  }
+}
