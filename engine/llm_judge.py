@@ -112,7 +112,7 @@ class LLMJudge:
             "subscores": {
                 "accuracy": round(overlap, 3),
                 "completeness": round(completeness, 3),
-                "relevance": round(relevance, 3),
+                "professionalism": round(relevance, 3),
             },
         }
 
@@ -236,12 +236,33 @@ class LLMJudge:
         }
 
     async def check_position_bias(self, response_a: str, response_b: str):
-        """Return a simple symmetric bias estimate based on response-length shift."""
-        len_a = len((response_a or "").strip())
-        len_b = len((response_b or "").strip())
-        total = max(1, len_a + len_b)
-        bias_score = abs(len_a - len_b) / total
+        """
+        Check position bias by swapping answer order (A/B then B/A).
+        Score is based on the first listed answer in each ordering.
+        """
+        probe_question = "Which candidate answer is better?"
+        probe_ground_truth = response_a
+
+        first_pass = await self._score_one_judge(
+            self.judge_models[0],
+            probe_question,
+            f"A: {response_a}\n\nB: {response_b}",
+            probe_ground_truth,
+        )
+        second_pass = await self._score_one_judge(
+            self.judge_models[0],
+            probe_question,
+            f"A: {response_b}\n\nB: {response_a}",
+            probe_ground_truth,
+        )
+
+        score_a_first = first_pass.get("score", 1.0)
+        score_a_second = second_pass.get("score", 1.0)
+        bias_score = abs(score_a_first - score_a_second) / 4.0
         return {
             "position_bias_score": round(bias_score, 3),
-            "is_position_biased": bias_score > 0.35,
+            "is_position_biased": bias_score > 0.25,
+            "judge_used": self.judge_models[0],
+            "score_when_a_first": round(score_a_first, 3),
+            "score_when_a_second": round(score_a_second, 3),
         }

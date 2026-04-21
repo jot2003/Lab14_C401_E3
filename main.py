@@ -42,7 +42,14 @@ async def run_benchmark_with_results(agent_version: str):
         print("❌ File data/golden_set.jsonl rỗng. Hãy tạo ít nhất 1 test case.")
         return None, None
 
-    runner = BenchmarkRunner(MainAgent(), ExpertEvaluator(), LLMJudge())
+    # Baseline and optimized versions must differ in judge configuration
+    # so regression delta reflects an actual configuration change.
+    if agent_version == "Agent_V1_Base":
+        judge = LLMJudge(judge_models=["gpt-4o-mini"], use_live_judges=False)
+    else:
+        judge = LLMJudge(judge_models=["gpt-4o", "gpt-4o-mini"], use_live_judges=True)
+
+    runner = BenchmarkRunner(MainAgent(), ExpertEvaluator(), judge)
     results = await runner.run_all(dataset)
 
     total = len(results)
@@ -55,6 +62,7 @@ async def run_benchmark_with_results(agent_version: str):
             "total": total,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "judge_models": list(judge_model_averages.keys()),
+            "judge_mode": "single-offline" if agent_version == "Agent_V1_Base" else "multi-live-or-fallback",
         },
         "metrics": {
             "avg_score": sum(r["judge"]["final_score"] for r in results) / total,
